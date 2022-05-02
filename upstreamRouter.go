@@ -32,16 +32,14 @@ func (router UpstreamRouter) shouldRoute(addr string) bool {
 
 	if ip != nil {
 		for _, v := range **router.Ips {
-			fmt.Printf("check %s", v)
 			if ip.Equal(v) {
 				return true
 			}
 		}
-	} else {
-		for _, v := range router.Hosts {
-			if host == v || strings.HasSuffix(host, fmt.Sprintf(".%s", v)) {
-				return true
-			}
+	}
+	for _, v := range router.Hosts {
+		if host == v || strings.HasSuffix(host, fmt.Sprintf(".%s", v)) {
+			return true
 		}
 	}
 

@@ -131,10 +131,11 @@ func tcpRemote(upstream string, router UpstreamRouter, addr string, shadow func(
 			if upstream != "" && router.shouldRoute(tgt.String()) {
 				logf("connecting to upstream %s", upstream)
 				rc, err = net.Dial("tcp", upstream)
-				defer rc.Close()
-				if err != nil {
-					logf("failed to connect to target: %v", err)
+				if rc == nil {
+					logf("ERROR connecting to upstream %s: %s", upstream, err)
 					return
+				} else {
+					defer rc.Close()
 				}
 				rc = shadow(rc)
 				if _, err = rc.Write(tgt); err != nil {
@@ -142,9 +143,15 @@ func tcpRemote(upstream string, router UpstreamRouter, addr string, shadow func(
 					return
 				}
 			} else {
-				logf("connecting to target %s", tgt.String())
-				rc, err = net.Dial("tcp", tgt.String())
-				defer rc.Close()
+				tgtStr := tgt.String()
+				logf("connecting to target %s", tgtStr)
+				rc, err = net.Dial("tcp", tgtStr)
+				if rc == nil {
+					logf("ERROR connecting to target %s: %s", tgtStr, err)
+					return
+				} else {
+					defer rc.Close()
+				}
 			}
 
 			logf("proxy %s <-> %s", c.RemoteAddr(), tgt)

@@ -43,6 +43,7 @@ func main() {
 		TCP        bool
 		Plugin     string
 		PluginOpts string
+		Upstream   string
 	}
 
 	flag.BoolVar(&config.Verbose, "verbose", false, "verbose mode")
@@ -64,6 +65,7 @@ func main() {
 	flag.BoolVar(&flags.TCP, "tcp", true, "(server-only) enable TCP support")
 	flag.BoolVar(&config.TCPCork, "tcpcork", false, "coalesce writing first few packets")
 	flag.DurationVar(&config.UDPTimeout, "udptimeout", 5*time.Minute, "UDP tunnel timeout")
+	flag.StringVar(&flags.Upstream, "upstream", "", "(server-only) upstream Shadowsocks server")
 	flag.Parse()
 
 	if flags.Keygen > 0 {
@@ -176,7 +178,7 @@ func main() {
 			go udpRemote(udpAddr, ciph.PacketConn)
 		}
 		if flags.TCP {
-			go tcpRemote(addr, ciph.StreamConn)
+			go tcpRemote(flags.Upstream, addr, ciph.StreamConn)
 		}
 	}
 

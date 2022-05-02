@@ -93,7 +93,7 @@ func tcpLocal(addr, server string, shadow func(net.Conn) net.Conn, getAddr func(
 }
 
 // Listen on addr for incoming connections.
-func tcpRemote(addr string, shadow func(net.Conn) net.Conn) {
+func tcpRemote(upstream string, addr string, shadow func(net.Conn) net.Conn) {
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		logf("failed to listen on %s: %v", addr, err)
@@ -127,10 +127,21 @@ func tcpRemote(addr string, shadow func(net.Conn) net.Conn) {
 				return
 			}
 
-			rc, err := net.Dial("tcp", tgt.String())
-			if err != nil {
-				logf("failed to connect to target: %v", err)
-				return
+			var rc net.Conn
+			if upstream != "" {
+				logf("connecting to upstream %s", upstream)
+				rc, err = net.Dial("tcp", upstream)
+				if err != nil {
+					logf("failed to connect to target: %v", err)
+					return
+				}
+				rc = shadow(rc)
+				if _, err = rc.Write(tgt); err != nil {
+					logf("failed to send target address: %v", err)
+					return
+				}
+			} else {
+				rc, err = net.Dial("tcp", tgt.String())
 			}
 			defer rc.Close()
 

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/url"
 	"os"
 	"os/signal"
@@ -27,23 +28,24 @@ var config struct {
 func main() {
 
 	var flags struct {
-		Client     string
-		Server     string
-		Cipher     string
-		Key        string
-		Password   string
-		Keygen     int
-		Socks      string
-		RedirTCP   string
-		RedirTCP6  string
-		TCPTun     string
-		UDPTun     string
-		UDPSocks   bool
-		UDP        bool
-		TCP        bool
-		Plugin     string
-		PluginOpts string
-		Upstream   string
+		Client          string
+		Server          string
+		Cipher          string
+		Key             string
+		Password        string
+		Keygen          int
+		Socks           string
+		RedirTCP        string
+		RedirTCP6       string
+		TCPTun          string
+		UDPTun          string
+		UDPSocks        bool
+		UDP             bool
+		TCP             bool
+		Plugin          string
+		PluginOpts      string
+		Upstream        string
+		UpstreamTargets string
 	}
 
 	flag.BoolVar(&config.Verbose, "verbose", false, "verbose mode")
@@ -66,6 +68,7 @@ func main() {
 	flag.BoolVar(&config.TCPCork, "tcpcork", false, "coalesce writing first few packets")
 	flag.DurationVar(&config.UDPTimeout, "udptimeout", 5*time.Minute, "UDP tunnel timeout")
 	flag.StringVar(&flags.Upstream, "upstream", "", "(server-only) upstream Shadowsocks server")
+	flag.StringVar(&flags.UpstreamTargets, "upstream-targets", "", "(server-only) comma-separated list of host names of the targets which should be routed to the upstream server")
 	flag.Parse()
 
 	if flags.Keygen > 0 {
@@ -177,8 +180,21 @@ func main() {
 		if flags.UDP {
 			go udpRemote(udpAddr, ciph.PacketConn)
 		}
+
+		var router UpstreamRouter
+		if flags.UpstreamTargets != "" {
+			fmt.Printf("Next targets will be routed to %s upstream: %s\n", flags.Upstream, flags.UpstreamTargets)
+			ips := []net.IP{}
+			ipsRef := &ips
+			router = UpstreamRouter{
+				Hosts: strings.Split(strings.ReplaceAll(flags.UpstreamTargets, " ", ""), ","),
+				Ips:   &ipsRef,
+			}
+			go router.Resolve()
+		}
+
 		if flags.TCP {
-			go tcpRemote(flags.Upstream, addr, ciph.StreamConn)
+			go tcpRemote(flags.Upstream, router, addr, ciph.StreamConn)
 		}
 	}
 

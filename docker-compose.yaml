@@ -9,8 +9,14 @@ services:
     ports:
       - 8488:8488
     environment:
-      - ROUTE_TO_UPSTREAM_HOSTS=google.com,www.google.com
-    command: -s 'ss://AEAD_CHACHA20_POLY1305:your-password@:8488' -verbose -upstream '10.7.0.3:8488'
+      - ROUTE_TO_UPSTREAM_HOSTS=
+    command: >
+      -s 'ss://AEAD_CHACHA20_POLY1305:your-password@:8488'
+      -verbose
+      -upstream '10.7.0.3:8488'
+      -upstream-targets '
+      google.com,
+      www.google.com'
     networks:
       socks:
         ipv4_address: 10.7.0.2

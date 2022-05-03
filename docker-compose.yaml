@@ -8,8 +8,6 @@ services:
         - shadowsocks
     ports:
       - 8488:8488
-    environment:
-      - ROUTE_TO_UPSTREAM_HOSTS=
     command: >
       -s 'ss://AEAD_CHACHA20_POLY1305:your-password@:8488'
       -verbose
@@ -26,8 +24,6 @@ services:
       context: .
       labels:
         - shadowsocks
-    environment:
-      - ROUTE_TO_UPSTREAM_HOSTS=
     command: -s 'ss://AEAD_CHACHA20_POLY1305:your-password@:8488' -verbose
     networks:
       socks:

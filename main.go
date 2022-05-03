@@ -187,11 +187,9 @@ func main() {
 		var router UpstreamRouter
 		if flags.UpstreamTargets != "" {
 			logf("Next targets will be routed to %s upstream: %s\n", flags.Upstream, flags.UpstreamTargets)
-			ips := []net.IP{}
-			ipsRef := &ips
 			router = UpstreamRouter{
 				Hosts: strings.Split(strings.ReplaceAll(flags.UpstreamTargets, " ", ""), ","),
-				Ips:   &ipsRef,
+				Ips:   []net.IP{},
 			}
 			go router.Resolve()
 		} else {
@@ -199,7 +197,7 @@ func main() {
 		}
 
 		if flags.TCP {
-			go tcpRemote(flags.Upstream, router, addr, ciph.StreamConn)
+			go tcpRemote(flags.Upstream, &router, addr, ciph.StreamConn)
 		}
 	}
 

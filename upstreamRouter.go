@@ -7,6 +7,19 @@ import (
 	"time"
 )
 
+func unique(s []net.IP) []net.IP {
+	inResult := make(map[string]bool)
+	var result []net.IP
+	for _, ip := range s {
+		ipstr := ip.String()
+		if _, ok := inResult[ipstr]; !ok {
+			inResult[ipstr] = true
+			result = append(result, ip)
+		}
+	}
+	return result
+}
+
 type UpstreamRouter struct {
 	Hosts []string
 	Ips   **[]net.IP
@@ -15,10 +28,11 @@ type UpstreamRouter struct {
 func (router UpstreamRouter) Resolve() {
 	for _, host := range router.Hosts {
 		t, _ := net.LookupIP(host)
-		newIps := append(**router.Ips, t...)
+		newIps := unique(append(**router.Ips, t...))
 		*router.Ips = &newIps
 	}
 
+	fmt.Printf("Next IPs are routed to upstream: %s\n", **router.Ips)
 	time.Sleep(60 * 1000)
 }
 

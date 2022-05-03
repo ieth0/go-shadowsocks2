@@ -9,3 +9,5 @@ IP exactly. If an item is not a valid IP address - it's considered a host name a
 DNS lookup is performed in the background once per minute for all hostname items. Target IP must match at least one item from the list
 according to the rules above in order to be routed to the upstream. If target does not match any of them - 
 traffic routed directly to the Internet.
+
+Find pre-built docker image in GHCR attached to the repo.

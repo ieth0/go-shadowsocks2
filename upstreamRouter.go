@@ -26,14 +26,16 @@ type UpstreamRouter struct {
 }
 
 func (router UpstreamRouter) Resolve() {
-	for _, host := range router.Hosts {
-		t, _ := net.LookupIP(host)
-		newIps := unique(append(**router.Ips, t...))
-		*router.Ips = &newIps
-	}
+	for {
+		for _, host := range router.Hosts {
+			t, _ := net.LookupIP(host)
+			newIps := unique(append(**router.Ips, t...))
+			*router.Ips = &newIps
+		}
 
-	fmt.Printf("Next IPs are routed to upstream: %s\n", **router.Ips)
-	time.Sleep(60 * 1000)
+		fmt.Printf("Next IPs are routed to upstream: %s\n", **router.Ips)
+		time.Sleep(60 * 1000)
+	}
 }
 
 func (router UpstreamRouter) shouldRoute(addr string) bool {

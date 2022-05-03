@@ -9,6 +9,7 @@ IP exactly. If an item is not a valid IP address - it's considered a host name a
 DNS lookup is performed in the background once per minute for all hostname items. Target IP must match at least one item from the list
 according to the rules above in order to be routed to the upstream. If target does not match any of them - 
 traffic routed directly to the Internet.
+
 Check out test setup of two proxies (main + upstream) in docker-compose.yaml.
 
 Find pre-built docker image in the packages attached to the repo.

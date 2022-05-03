@@ -27,14 +27,16 @@ type UpstreamRouter struct {
 
 func (router UpstreamRouter) Resolve() {
 	for {
+		newIps := **router.Ips
 		for _, host := range router.Hosts {
 			t, _ := net.LookupIP(host)
-			newIps := unique(append(**router.Ips, t...))
-			*router.Ips = &newIps
+			newIps = append(newIps, t...)
 		}
+		newIps = unique(newIps)
+		*router.Ips = &newIps
 
-		fmt.Printf("Next IPs are routed to upstream: %s\n", **router.Ips)
-		time.Sleep(60 * 1000)
+		logf("Next IPs are routed to upstream: %s\n", **router.Ips)
+		time.Sleep(time.Minute)
 	}
 }
 

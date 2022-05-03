@@ -27,6 +27,9 @@ var config struct {
 
 func main() {
 
+	println("Starting")
+	fmt.Printf("Args: %s\n", os.Args)
+
 	var flags struct {
 		Client          string
 		Server          string
@@ -183,7 +186,7 @@ func main() {
 
 		var router UpstreamRouter
 		if flags.UpstreamTargets != "" {
-			fmt.Printf("Next targets will be routed to %s upstream: %s\n", flags.Upstream, flags.UpstreamTargets)
+			logf("Next targets will be routed to %s upstream: %s\n", flags.Upstream, flags.UpstreamTargets)
 			ips := []net.IP{}
 			ipsRef := &ips
 			router = UpstreamRouter{
@@ -191,6 +194,8 @@ func main() {
 				Ips:   &ipsRef,
 			}
 			go router.Resolve()
+		} else {
+			logf("upstream-targets is empty, all traffic will go to the Internet")
 		}
 
 		if flags.TCP {
